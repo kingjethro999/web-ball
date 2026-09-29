@@ -580,16 +580,63 @@ export class Stadium {
     this.marker.visible = !menu && !!p && !p.red;
     if (p) this.marker.position.set(p.x, 0.06, p.z);
     const mode = this.settings.camera;
-    let pos: T.Vector3, target: T.Vector3;
+    let pos: T.Vector3, target: T.Vector3, fov: number;
     if (menu) {
       pos = new T.Vector3(40 + Math.sin(this.frame * 0.025) * 8, 37, 53);
       target = new T.Vector3(2, 0, -4);
+      fov = 43;
+    } else if (match.phase === "goal") {
+      const orbit = this.frame * 0.38;
+      pos = new T.Vector3(
+        b.x + Math.cos(orbit) * 13,
+        7.5,
+        b.z + Math.sin(orbit) * 13,
+      );
+      target = new T.Vector3(b.x, 1.1, b.z);
+      fov = 38;
+    } else if (match.phase === "restart" && match.restartLabel !== "KICK OFF") {
+      const side = match.restartPos.z > 0 ? 1 : -1;
+      pos = new T.Vector3(
+        match.restartPos.x - match.direction(match.restartTeam) * 12,
+        11,
+        match.restartPos.z + side * 14,
+      );
+      target = new T.Vector3(
+        match.restartPos.x + match.direction(match.restartTeam) * 7,
+        0.6,
+        match.restartPos.z - side * 2,
+      );
+      fov = 42;
     } else if (mode === "tactical") {
-      pos = new T.Vector3(b.x * 0.18, 95, 58);
-      target = new T.Vector3(b.x * 0.18, 0, 0);
-    } else if (mode === "close") {
-      pos = new T.Vector3(b.x * 0.85, 29, clamp(b.z * 0.4 + 35, 25, 52));
-      target = new T.Vector3(b.x * 0.85, 0, b.z * 0.6);
+      pos = new T.Vector3(b.x * 0.12, 98, 0.1);
+      target = new T.Vector3(b.x * 0.12, 0, b.z * 0.12);
+      fov = 49;
+    } else if (mode === "wide") {
+      pos = new T.Vector3(b.x * 0.78, 34, b.z * 0.22 + 51);
+      target = new T.Vector3(b.x * 0.82, 0.7, b.z * 0.68);
+      fov = 43;
+    } else if (mode === "dynamic") {
+      const leadX = clamp(b.vx * 0.55, -8, 8);
+      const leadZ = clamp(b.vz * 0.38, -5, 5);
+      const pressure = Math.min(1, Math.abs(b.x) / 52.5);
+      pos = new T.Vector3(
+        b.x * 0.86 + leadX * 0.25,
+        27 + pressure * 5,
+        b.z * 0.36 + 43 - pressure * 5,
+      );
+      target = new T.Vector3(b.x + leadX, 1.1, b.z + leadZ);
+      fov = 42 - pressure * 5;
+    } else if (mode === "end-to-end") {
+      const ownGoal = match.direction(0) === 1 ? -1 : 1;
+      pos = new T.Vector3(ownGoal * 62, 17, b.z * 0.18);
+      target = new T.Vector3(b.x * 0.72, 1.0, b.z * 0.72);
+      fov = 47;
+    } else if (mode === "player" && p) {
+      const forwardX = Math.sin(p.facing);
+      const forwardZ = Math.cos(p.facing);
+      pos = new T.Vector3(p.x - forwardX * 7.2, 4.1, p.z - forwardZ * 7.2);
+      target = new T.Vector3(p.x + forwardX * 5.5, 1.25, p.z + forwardZ * 5.5);
+      fov = 55;
     } else {
       const mobile = this.camera.aspect < 1.1;
       pos = new T.Vector3(
@@ -598,9 +645,19 @@ export class Stadium {
         b.z * 0.25 + (mobile ? 72 : 64),
       );
       target = new T.Vector3(b.x * 0.65, 0, b.z * 0.4);
+      fov = mobile ? 48 : 43;
     }
+    pos.x = clamp(pos.x, -66, 66);
+    pos.y = clamp(pos.y, 3.2, 105);
+    pos.z = clamp(pos.z, -78, 78);
     this.camera.position.lerp(pos, 1 - Math.exp(-dt * 3));
     this.target.lerp(target, 1 - Math.exp(-dt * 4));
+    const nextFov =
+      this.camera.fov + (fov - this.camera.fov) * (1 - Math.exp(-dt * 3));
+    if (Math.abs(nextFov - this.camera.fov) > 0.01) {
+      this.camera.fov = nextFov;
+      this.camera.updateProjectionMatrix();
+    }
     this.camera.lookAt(this.target);
     this.renderer.render(this.scene, this.camera);
   }

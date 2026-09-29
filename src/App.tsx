@@ -45,6 +45,7 @@ import {
   SHAPES,
   STAT_LABELS,
   DEFAULT_SETTINGS,
+  CAMERA_MODES,
   newCareer,
   roster,
   overall,
@@ -68,6 +69,14 @@ import { createStadium, type StadiumView } from "./renderer";
 import { Controls, Sound } from "./input";
 import { loadCareer, saveCareer, loadSettings, api } from "./storage";
 type Page = "play" | "career" | "squad" | "market" | "league";
+const CAMERA_LABELS: Record<Settings["camera"], string> = {
+  broadcast: "Broadcast / Tele",
+  wide: "Wide sideline",
+  dynamic: "Dynamic / Cinematic",
+  "end-to-end": "End-to-end",
+  tactical: "Top-down / Tactical",
+  player: "Player cam",
+};
 type Game = {
   match: Match;
   clubs: [Club, Club];
@@ -1416,9 +1425,12 @@ function SettingsPanel({
           value={settings.camera}
           onChange={(e) => update("camera", e.target.value)}
         >
-          <option value="broadcast">Broadcast — classic sideline</option>
-          <option value="tactical">Tactical — see the whole shape</option>
-          <option value="close">Close — nearer the action</option>
+          <option value="broadcast">Broadcast / Tele</option>
+          <option value="wide">Wide sideline</option>
+          <option value="dynamic">Dynamic / Cinematic</option>
+          <option value="end-to-end">End-to-end</option>
+          <option value="tactical">Top-down / Tactical</option>
+          <option value="player">Player cam</option>
         </select>
       </label>
       <label className="field">
@@ -1513,6 +1525,7 @@ function ControlsGuide() {
               ["Lob / cross", "L", "X / □", "Lob"],
               ["Switch player", "Space", "Y / △", "Switch"],
               ["Tackle", "E", "LT / L2", "Tackle"],
+              ["Camera view", "C", "Pause menu", "Pause menu"],
               ["Pause / game plan", "Esc", "Start / Options", "Pause"],
             ].map((row) => (
               <tr key={row[0]}>
@@ -1714,7 +1727,8 @@ function MatchScreen({
       const frame = (now: number) => {
         const dt = Math.min((now - prev) / 1000, 0.08);
         prev = now;
-        if (window.innerHeight > window.innerWidth && !pausedRef.current) pause(true);
+        if (window.innerHeight > window.innerWidth && !pausedRef.current)
+          pause(true);
         const input = controls.read();
         for (const key of ["pass", "shoot", "lob", "switch", "tackle"] as const)
           pending[key] ||= input[key];
@@ -1784,6 +1798,19 @@ function MatchScreen({
       stadiumRef.current.settings.camera = settings.camera;
     if (soundRef.current) soundRef.current.enabled = settings.sound;
   }, [settings]);
+  useEffect(() => {
+    const cycleCamera = (event: KeyboardEvent) => {
+      if (event.code !== "KeyC" || event.repeat) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.matches("input, select, textarea")) return;
+      const current = CAMERA_MODES.indexOf(settings.camera);
+      const camera = CAMERA_MODES[(current + 1) % CAMERA_MODES.length];
+      updateSettings({ ...settings, camera });
+      notify(`Camera · ${CAMERA_LABELS[camera]}`);
+    };
+    window.addEventListener("keydown", cycleCamera);
+    return () => window.removeEventListener("keydown", cycleCamera);
+  }, [notify, settings, updateSettings]);
   const fulltime = match.phase === "finished",
     halftime = match.phase === "halftime",
     overlay = paused || fulltime || halftime,

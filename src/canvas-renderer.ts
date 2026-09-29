@@ -88,7 +88,7 @@ export class CanvasStadium {
       ? Math.max(this.w / 132, this.h / 74)
       : camera === "tactical"
         ? Math.min(this.w / 125, this.h / 66)
-        : camera === "close"
+        : camera === "wide"
           ? Math.min(this.w / 63, this.h / 41)
           : Math.min(this.w / 96, this.h / 54);
     this.cx +=

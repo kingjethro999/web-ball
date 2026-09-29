@@ -186,6 +186,10 @@ test("save validator rejects a corrupt lineup and invalid settings", () => {
     settingsSchema.safeParse({ ...DEFAULT_SETTINGS, duration: 90 }).success,
     false,
   );
+  assert.equal(
+    settingsSchema.parse({ ...DEFAULT_SETTINGS, camera: "close" }).camera,
+    "wide",
+  );
 });
 test("shots crossing between the posts score exactly once", () => {
   const m = setup();

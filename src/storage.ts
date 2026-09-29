@@ -103,21 +103,34 @@ export const careerSchema = z
     if (new Set(c.table.map((t) => t.club)).size !== 16)
       ctx.addIssue({ code: "custom", message: "Invalid league table." });
   });
-export const settingsSchema = z.object({
-  camera: z.enum(["broadcast", "tactical", "close"]),
-  difficulty: z.enum(["casual", "club", "elite"]),
-  duration: z.union([
-    z.literal(120),
-    z.literal(180),
-    z.literal(300),
-    z.literal(360),
-    z.literal(480),
-    z.literal(600),
-  ]),
-  quality: z.enum(["low", "high"]),
-  sound: z.boolean(),
-  touch: z.boolean(),
-});
+export const settingsSchema = z
+  .object({
+    camera: z.enum([
+      "broadcast",
+      "wide",
+      "dynamic",
+      "end-to-end",
+      "tactical",
+      "player",
+      "close",
+    ]),
+    difficulty: z.enum(["casual", "club", "elite"]),
+    duration: z.union([
+      z.literal(120),
+      z.literal(180),
+      z.literal(300),
+      z.literal(360),
+      z.literal(480),
+      z.literal(600),
+    ]),
+    quality: z.enum(["low", "high"]),
+    sound: z.boolean(),
+    touch: z.boolean(),
+  })
+  .transform((settings) => ({
+    ...settings,
+    camera: settings.camera === "close" ? ("wide" as const) : settings.camera,
+  }));
 const KEY = "web-ball:career:v1";
 export function loadCareer(): { career: Career; warning?: string } {
   try {
@@ -178,11 +191,9 @@ export async function api(path: string, body?: unknown, method?: string) {
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const result = await res
-    .json()
-    .catch(() => ({
-      error: "Account server is unavailable. Guest play still works.",
-    }));
+  const result = await res.json().catch(() => ({
+    error: "Account server is unavailable. Guest play still works.",
+  }));
   if (!res.ok) throw new Error(result.error ?? "Request failed.");
   return result;
 }

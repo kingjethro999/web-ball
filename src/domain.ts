@@ -421,8 +421,17 @@ export type Career = {
   }[];
   completed: string[];
 };
+export const CAMERA_MODES = [
+  "broadcast",
+  "wide",
+  "dynamic",
+  "end-to-end",
+  "tactical",
+  "player",
+] as const;
+export type CameraMode = (typeof CAMERA_MODES)[number];
 export type Settings = {
-  camera: "broadcast" | "tactical" | "close";
+  camera: CameraMode;
   difficulty: "casual" | "club" | "elite";
   duration: number;
   quality: "low" | "high";
