@@ -1,0 +1,31 @@
+Web Ball player runtime assets
+================================
+
+Source mesh and skeleton
+------------------------
+Quaternius — Universal Base Characters, Standard free edition
+https://quaternius.itch.io/universal-base-characters
+Source: Superhero_Male_FullBody.gltf and its referenced files
+License: CC0 1.0 Universal
+Original license preserved at:
+assets-source/quaternius/base-character/LICENSE.txt
+
+Source locomotion animations and skeleton
+-----------------------------------------
+Quaternius — Universal Animation Library, Standard free edition
+https://quaternius.itch.io/universal-animation-library
+Source: UAL1_Standard.glb, no-root-motion edition
+License: CC0 1.0 Universal
+Original license preserved at:
+assets-source/quaternius/animations/LICENSE.txt
+
+Local transformations
+---------------------
+The source mesh was assigned named football-kit material regions for runtime
+club, goalkeeper, skin, hair and boot customization. Web Ball's pass, shot,
+lob, tackle, slide, header, celebration, dejection, goalkeeper and referee
+clips were authored locally on the same Quaternius skeleton with Blender.
+The local transformations are part of Web Ball's source distribution.
+
+Retrieved: 2026-09-28
+Runtime export generated with Blender 5.2 LTS.
