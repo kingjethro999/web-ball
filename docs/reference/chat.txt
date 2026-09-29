@@ -1,0 +1,130 @@
+i told claude: 
+hello i am trying to make a football game, i told my ai agent to do it, cause i see people bragging on how thier own ai could create awesome 3d games for them, but it's not doing as i expected, before you write anything, lemme give you my initial instructions:
+
+"create me a game, Web Ball, the aim is a football game that one can play with console pads, WASD keyboard control, and on mobile one can play it with touch, i honestly dont know how to go about it but this is my idea
+
+All right, so I'm thinking of making an application. So now this application, I would love this application to be like a self-upgrading system, in every match that you play against the AI teams, all right, AI teams, each match you play against AI teams, you get rank points. Let's just say coins rather. You can use coins to go to market, all right, market and buy players with upgraded statistics, all right. Or, or you can use that to upgrade your existing players. Although your existing players come with default statistics, all right. There are default statistics for a goalkeeper, a right back, whatever it may be. Although you have a maximum of 10 points upgrades for each player on your team. There should be a place for subs and there should be a place for reserves. There should also be a button that allows users to automatically pick best eleven based on statistics and position. There should be a place in which user can change formation, all right. I got this idea from FIFA, FIFA 18, although we do not have license to use real player names or real club names. So I would like you to get creating on that, all right. In a league, I think there are like 15 clubs, if I'm not mistaken, I do not know, all right. So people can either play exhibition with random clubs. If you enter a FIFA 18 game or DLS, Dream League Soccer, or Dream League Soccer game, you will see their pages, I'm sorry, their modes all around the interface as you're entering. Probably at the left side you see career mode. I don't know, I'm just saying, all right. I don't know how you may want to structure this, but you see career mode. On career mode you can see quick match. From quick match you can view league stats. Okay, no, that is in career mode. In career mode you can either go to next game, view stats, stats show you highest assists, highest goals, and all that. Honestly speaking, I do not know how you may want to generate the players, but please I do not want something crap, please. Someone used Claude Opus to do his, and his players were looking genuinely nice. Honestly speaking, they were not looking like some that were made out of shapes and boxes. They were looking genuinely nice, well placed on the pitch. The pitch was not looking static, whatever, was not glitching whatsoever. It was looking nice, honestly speaking. In game, there should be shoot, lob pass, as in cross pass, and normal passing. Then there is movement. We just keep it as that. Then you can change camera view when you pause the game. There should be game settings where you can change camera view, and there should be gameplay, game something, sha. There's one game stuff that you can change your play style mid-game, substitute players mid-game when you pause. That should be that all in the pause settings plus the stats of the game, goals, teams, all those things, players that scored, all that. So yeah, I am giving you these stats, and I actually want you to do it to the best of your capacity. You understand me? Because I would not like this to go to flop, honestly speaking. I feel you would have done better this like this. It's a web app. If you can make it web app, I'm not forcing you. These are all just my suggestions. If you feel that there's a preferable way to do this, sure, do it, all right? You may not be able to render UI for me. My GitHub is connected. Push it to my GitHub. I will clone it and I'll run it on my PC and I'll see the output. I also have codex on my PC that I can follow up with codex on whatever the issue may be. But this is my instruction to you to make this app as best as you can. You can also go to— the name was Game Plan Settings. So like a game plan settings when you pause the game. Also in home, in home users can have career mode, multiplayer. For multiplayer mode, just say coming soon. Just say coming soon because I have set up a server for that, but just say coming soon, all right? Also I will give you my Neon database URL, the ENV key, the database URL. So you use that, clear whatever may be inside that URL, because it was used for an old project that is no longer functioning. So I want to use that Node, sorry, that PostgreSQL Neon for this project instead. So I will give you this name if you request for it. If you request for the ENV, I'll give it to you. Or you can just push it to my GitHub and I'll set everything there for myself, all right? We can use that to store users' data. User comes in, create an account, or continue playing as guest. For guest, it's quite tricky, but we will have to use local storage and proper state management, all right? That's just it for now. I do not honestly know how you want to go about this, but I prefer you do it in the best way possible. All right? This is my idea, and I would really love to... Someone used Opus, Opus, and created a really clean shooting game, and I really love it. And honestly speaking, it was a squirrel tune or something like that. I forget what his name is. But this guy made something really cool, and I just want to make it football. Football is already specific. Football is already well written and specific. We already know the rules of football, how football works, the camera angles, all that, when you have to take corner kicks, free kicks, penalties. We all know how that works, you know? I'm taking my idea from both Dream League Soccer and FIFA 18. I like their UI, their play style, their everything, and I would like for us to be able to increase players with coins and all that. Also please health status too: red card keeping, yellow card keeping. You all know how those things are. Yeah, gotten two yellow cards in two consecutive game, your team will automatically flag you and tell you to be replaced. All those are done in a real career game. Once you get too much red card, you will substitute from the next match. Too much yellow card as well. Within the team, too much yellow card means another player will have to come out and play. You understand all those rules of football? Do your proper research, whatever you may want to do with this. All right? Push to my GitHub if you cannot run it for me to view it. All right? Just push to my GitHub. I would love to see this. I would love this on mobile as well, responsive. I don't know what I'm talking, web terms, but I don't honestly know. I think that's why I called it web ball, but I don't know. You might rename it, please, rename it if possible, rename it. Honestly speaking, I do not have a fixed goal here. I do not have a fixed branding name or anything here, because you do know I do not have license to use real player names or anything. So please go adventurous. Go deep for me, all right? Think well for me, please. I really need this to go well, honestly speaking. Someone can use Claude Opus 5, and I'm using GPT, OpenAI's strongest model. I would actually need you to do this properly for me. Thank you.
+[@GitHub](plugin://github@openai-curated-remote)"
+
+then now i want it to modify what it has done all through:
+
+see my prompt:
+"
+what did you use for the player please? the player 3d design?, i would not like you to use cyclinder shapes, square head rubbish, i would like proper football characters, also please, not just 16 clubs, we are to have 16 * 3, they will be 3 divisions, every user must start from academy division, playing with players rate ovr 60 and above to 72 max, then division 2: you can then have elite players with higher ratings, then pro division where you have pro players of 80 and above, note a user must save coins to upgrade players, or buy existing players, why on earth am i seeing drop downs in a footbal game,  the fact its a web based 3d football game doesnt mean you are to make it like your conventional websites, common man, also why didnt you provide proper 3d view?
+they should be different type of views from the sideline, like modern football games have
+"
+but i want it to get it on point, properly for me
+i am using gpt 6 astra
+i need to prompt it well to actually get the characters and game settings well
+
+
+claude response:
+Your draft has the right instincts. It reads as a complaint, though, and an agent given complaints tends to patch the surface (swap a cylinder for a capsule) rather than fix the cause. The prompt below tells it what to build, what to avoid, how to check its own work, and what order to work in.
+
+Some points first, because they affect how you prompt:
+
+- **Don't ask the agent to "make nice players" out of code shapes.** That is why you got cylinders and box heads. Real character quality comes from a rigged, animated model (a skeleton with run, kick, and tackle animations), not from primitives. The prompt tells it to use a properly licensed free character model and recolor it per club kit.
+- **Give it acceptance criteria.** "Player looks like a person, no dropdowns, 6 camera views" can be checked. "Make it good" can't.
+- **Make it work in milestones and show screenshots.** Otherwise it will say it's done when it isn't.
+- **Give it a bad-output list.** Naming what you hate (cylinders, dropdowns, website-style UI) works well.
+
+Paste this to your agent:
+
+```
+You are continuing work on my existing football game repo. Do NOT start over blindly. First audit what exists, then fix and extend it. The current build is not acceptable, and this message explains why and what I expect instead.
+
+## What is wrong with the current build
+1. Players are built from cylinders/boxes with square heads. Unacceptable. I want proper football players that look like humans.
+2. The UI looks like a normal website (dropdowns, forms, dashboards). This is a football GAME. It must feel like FIFA 18 / Dream League Soccer.
+3. The 3D view is not proper. There is no real match camera like modern football games.
+4. There are only 16 clubs. I need 3 divisions.
+
+## Step 0: Audit and plan (do this first, briefly)
+- Read the repo, list what works and what to rip out, and give me a short plan by milestone. Then start building.
+- Do not leave placeholders, TODOs, or fake buttons. If something isn't built, don't show it.
+
+## 1. Player characters (highest priority)
+- Use rigged, skinned humanoid characters (GLTF/GLB with skeleton) with real animations: idle, jog, sprint, turn, pass, shoot, lob/cross, tackle, slide tackle, header, celebrate, dejected, goalkeeper stance/dive/catch/punt, referee.
+- Do NOT use cylinders, capsules-as-bodies, boxes, or spheres for the body or head. No blocky characters.
+- Source: use CC0 or clearly licensed free models (e.g. Quaternius, KayKit, or similar). Verify each license permits commercial use and redistribution, and list them in CREDITS.md. Do not use Mixamo files committed to the repo unless the license clearly allows it.
+- If you cannot obtain a suitable rigged model in your environment, STOP and tell me exactly which files I need to download and where to put them. Don't silently fall back to primitive shapes.
+- Customization: recolor kit (shirt, shorts, socks) per club by material swapping. Vary skin tone, hair, height, and build by player so the squad doesn't look cloned. Show shirt numbers. Goalkeepers get a different kit color.
+- Animation blending (no snapping between poses), foot planting, players face movement direction, ball interaction that looks intentional.
+- Performance: instanced/shared skeletons where possible, target 60fps on a mid phone. Add a quality setting (Low/Med/High).
+
+## 2. Camera system (like modern football games)
+Implement these camera views, switchable in Pause > Settings and via a shortcut key/button:
+1. Broadcast / Tele (high sideline, default, smooth pan and zoom following the ball)
+2. Wide sideline (lower, closer, more dramatic)
+3. Dynamic / Cinematic sideline (follows action with slight lead and zoom)
+4. End-to-end (behind the goal, depth-focused)
+5. Top-down / Tactical
+6. Player cam (behind the controlled player)
+Also: smooth camera damping, no jitter, no clipping through stands, and automatic cinematic cuts for goals, corners, free kicks, penalties, and replays (a short goal replay is a bonus).
+The pitch must be rendered properly: mown grass stripes, correct markings, goals with nets, corner flags, stands/crowd, floodlights, and soft shadows. No z-fighting or flickering.
+
+## 3. UI/UX: must feel like a console/mobile football game
+- NO dropdowns, native selects, HTML forms, or website-style navigation anywhere in the game.
+- Use big card/tile menus, carousels, tabs, sliders and steppers, and full-screen game-style screens with a side menu (Career, Quick Match, Squad, Market, Stats, Settings).
+- Everything is navigable with a gamepad (D-pad/stick, A/B), WASD/arrows + Enter/Esc, mouse, and touch. Show a visible focus highlight on the selected item.
+- Visual style: dark broadcast-style overlays, bold typography, team-colored accents, smooth transitions, player card art (FUT-style cards with rating, position, and mini stats).
+- Fully responsive: landscape-first on mobile with a touch overlay (virtual stick on the left; Pass, Lob/Cross, Shoot, Sprint, and Switch Player on the right). Layout must not break on small screens.
+
+## 4. Controls
+- Gamepad, keyboard (WASD + keys for Pass / Lob-Cross / Shoot / Sprint / Switch player / Pause), and touch.
+- Pass, Lob/Cross, Shoot with power-charge bar, direction-based aiming, sprint with stamina, and tackle/switch player on defense.
+- Show button remapping in Settings.
+
+## 5. League structure (fictional names only)
+- 3 divisions × 16 clubs = 48 original fictional clubs. No real names/logos. Generate crest designs procedurally or with SVG, with unique names, colors, and kits.
+- Divisions:
+  - Academy Division: EVERY new user starts here. Player base OVR 60-72.
+  - Elite Division: higher-rated players (73-79).
+  - Pro Division: 80+ players.
+- Full round-robin seasons (home and away), league table, promotion/relegation between divisions (top teams up, bottom teams down), and season summary.
+- Career menu: Next Match, Fixtures, Table, Stats (top scorers, assists, clean sheets, cards), Squad, Market, Club.
+- Also: Quick Match/Exhibition (pick any club) and Multiplayer tile showing "Coming Soon".
+
+## 6. Economy and progression
+- Coins earned per match (win > draw > loss, with bonuses for goals and clean sheets, scaled by division).
+- Market: buy players, prices scaled by OVR, position, and age.
+- Upgrades: each player has a hard cap of 10 upgrade points, spent on individual stats (pace, shooting, passing, dribbling, defending, physical; GK stats for goalkeepers). The cost per point rises. Show before/after stats.
+- Coins must be a real constraint. The player has to save to upgrade or buy. Balance so a full season in Academy gives meaningful but not excessive progress.
+- Squad management: starting XI, subs bench, reserves. Change formation (4-4-2, 4-3-3, 4-2-3-1, 3-5-2, 5-3-2, etc.) on a visual pitch by dragging or selecting players (no dropdowns). "Auto-pick best XI" button based on stats and position fit, with out-of-position penalties.
+
+## 7. Match rules and management
+- Full football rules: kickoff, throw-ins, goal kicks, corners, free kicks, penalties, offside, fouls, advantage, yellow/red cards, extra stoppage time, half-time/full-time.
+- Cards and discipline persist across matches: 2 yellows in consecutive games or accumulated yellows means a suspension. A red card means a ban of 1+ matches. Show suspended players and force a replacement in the squad screen, with auto-suggestion. Also add injuries and fitness/fatigue.
+- Pause menu: resume, substitutions (max 5), formation/Game Plan (play style: attacking/balanced/defensive/counter, pressing, width, tempo), camera view, match stats (score, scorers, shots, possession, cards), settings, quit.
+- AI: opponents must play sensibly (positioning, pressing, passing lanes, GK behavior) with difficulty scaling by division.
+
+## 8. Accounts and data
+- Guest mode: full local save (localStorage/IndexedDB) with clean state management.
+- Account mode: register/login, save career to my Neon PostgreSQL via DATABASE_URL (env var only, never commit secrets; provide .env.example). Write migrations for the schema. Ask me before wiping the existing database, and give me the exact command to reset it.
+- Sync guest progress into an account when the user signs up.
+
+## Engineering requirements
+- Keep the stack modern (TypeScript, Three.js or Babylon.js, a component framework for menus). Clean folder structure, README with setup/run commands, and a CREDITS.md.
+- Game logic separate from rendering (so it's testable). Add unit tests for the league, economy, and discipline rules.
+- Run the game yourself, check the console for errors, and capture screenshots of: main menu, squad screen, a match in each camera view, pause menu, and mobile layout. If you can't run it, say so clearly rather than claiming it works.
+- Push to my GitHub in small, well-named commits after each milestone.
+
+## Milestones (finish and verify each before the next)
+M1: Real rigged player models + animations + proper pitch + camera views
+M2: Game-style UI shell + full controls (gamepad, keyboard, touch)
+M3: Core match gameplay + rules + AI
+M4: 3 divisions, league, promotion/relegation, cards/suspensions
+M5: Economy, market, upgrades, squad/formation/auto-pick
+M6: Accounts, database, guest saves, polish, performance
+
+After each milestone, report: what's done, what's not, what you verified, and any decisions I need to make. Be honest about limitations. If something is not achievable at this quality, tell me plainly and propose the closest alternative.
+```
+
+**Tips for using it:**
+
+1. **Send it in one go, but tell the agent to stop after each milestone.** That way you review M1 (the characters and cameras) before it builds everything else on top. If M1 still looks bad, fix it there.
+2. **If the players still look bad after M1,** don't argue about shapes. Say: "Show me a screenshot of the player model close up and tell me the exact asset and license you used." That forces it to be concrete.
+3. **You can manually drop in a model.** Download a free rigged football-style character from Quaternius or KayKit and give it to the agent. This is often the fastest way to get a good result.
+4. **Use Codex or GPT for follow-ups on small bugs,** but keep this master prompt in the repo as `SPEC.md`. Tell the agent to check it before each task so it doesn't drift.
+
+If you tell me what the agent produced after M1, I can help you write the next correction prompt.
