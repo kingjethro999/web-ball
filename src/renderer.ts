@@ -1,13 +1,23 @@
 import * as T from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { clone as cloneSkeleton } from "three/addons/utils/SkeletonUtils.js";
 import { Match } from "./engine";
 import { type Club, type Settings, rng } from "./domain";
 const skinColors = [0xf2c6a6, 0xc99168, 0x9c6246, 0x714731, 0x4c3027];
+const LOOPING_ANIMATIONS = new Set([
+  "idle",
+  "walk",
+  "jog",
+  "sprint",
+  "gk_stance",
+  "celebrate",
+  "dejected",
+]);
 type Avatar = {
   group: T.Group;
-  legs: T.Group[];
-  arms: T.Group[];
-  body: T.Group;
-  number: string;
+  mixer: T.AnimationMixer;
+  actions: Map<string, T.AnimationAction>;
+  active: string;
 };
 export class Stadium {
   renderer: T.WebGLRenderer;
@@ -25,6 +35,7 @@ export class Stadium {
   settings: Settings;
   materials: T.Material[] = [];
   textures: T.Texture[] = [];
+  characterError?: HTMLElement;
   constructor(
     public container: HTMLElement,
     public match: Match,
@@ -71,23 +82,7 @@ export class Stadium {
     this.scene.add(sun);
     this.pitch();
     this.stands();
-    for (const p of match.players) {
-      const color =
-        p.slot === 0
-          ? p.team === 0
-            ? "#87df9c"
-            : "#e697f3"
-          : clubs[p.team].color;
-      const avatar = this.player(
-        color,
-        p.data.skin,
-        p.data.hair,
-        p.number,
-        p.data.name,
-      );
-      this.avatars.push(avatar);
-      this.root.add(avatar.group);
-    }
+    void this.loadPlayers();
     this.ball = new T.Mesh(
       new T.SphereGeometry(0.23, 16, 12),
       new T.MeshStandardMaterial({ map: this.ballTexture(), roughness: 0.6 }),
@@ -392,202 +387,121 @@ export class Stadium {
         this.root.add(light);
       }
   }
-  player(
-    color: string,
-    skin: number,
-    hair: number,
-    number: number,
-    name: string,
-  ): Avatar {
-    const g = new T.Group(),
-      body = new T.Group();
-    g.add(body);
-    const jersey = this.material(color, 0.75),
-      skinMat = this.material(skinColors[skin], 0.85),
-      shorts = this.material("#1b2927"),
-      sock = this.material(color),
-      boot = this.material("#e3e7cb"),
-      hairMat = this.material([0x1b1512, 0x241a14, 0x382618, 0x131310][hair]);
-    const profile = [
-      [0.22, 0.85],
-      [0.27, 0.95],
-      [0.29, 1.16],
-      [0.34, 1.35],
-      [0.25, 1.44],
-    ].map(([x, y]) => new T.Vector2(x, y));
-    const torso = this.mesh(new T.LatheGeometry(profile, 12), jersey);
-    torso.scale.z = 0.64;
-    body.add(torso);
-    const hips = this.mesh(
-      new T.SphereGeometry(0.28, 12, 8),
-      shorts,
-      0,
-      0.88,
-      0,
-    );
-    hips.scale.set(1, 0.65, 0.72);
-    body.add(hips);
-    body.add(
-      this.mesh(
-        new T.CylinderGeometry(0.085, 0.1, 0.16, 8),
-        skinMat,
-        0,
-        1.47,
-        0,
-      ),
-    );
-    const head = this.mesh(
-      new T.SphereGeometry(0.18, 16, 12),
-      skinMat,
-      0,
-      1.66,
-      0,
-    );
-    head.scale.set(0.88, 1.17, 0.97);
-    body.add(head);
-    const hairMesh = this.mesh(
-      new T.SphereGeometry(
-        0.184,
-        12,
-        10,
-        0,
-        Math.PI * 2,
-        0,
-        Math.PI * (hair === 2 ? 0.35 : 0.47),
-      ),
-      hairMat,
-      0,
-      1.71,
-      -0.012,
-    );
-    hairMesh.scale.set(0.91, hair === 3 ? 1.24 : 1, 0.96);
-    body.add(hairMesh);
-    const nose = this.mesh(
-      new T.SphereGeometry(0.043, 8, 6),
-      skinMat,
-      0,
-      1.65,
-      0.166,
-    );
-    nose.scale.set(0.7, 1, 1);
-    body.add(nose);
-    const eyes = this.material("#29211c");
-    for (const x of [-0.067, 0.067])
-      body.add(
-        this.mesh(new T.SphereGeometry(0.014, 6, 4), eyes, x, 1.705, 0.149),
+  async loadPlayers() {
+    try {
+      const loader = new GLTFLoader();
+      const [footballer, motionLibrary] = await Promise.all([
+        loader.loadAsync("/assets/players/footballer.glb"),
+        loader.loadAsync("/assets/players/football-actions.glb"),
+      ]);
+      if (this.disposed) return;
+      const clips = new Map(
+        motionLibrary.animations.map((clip) => [clip.name, clip]),
       );
-    const legs: T.Group[] = [],
-      arms: T.Group[] = [];
-    for (const sign of [-1, 1]) {
-      const leg = new T.Group();
-      leg.position.set(sign * 0.14, 0.85, 0);
-      leg.add(
-        this.mesh(
-          new T.CylinderGeometry(0.115, 0.085, 0.34, 8),
-          shorts,
-          0,
-          -0.13,
-          0,
-        ),
-      );
-      leg.add(
-        this.mesh(
-          new T.CylinderGeometry(0.083, 0.067, 0.3, 8),
-          skinMat,
-          0,
-          -0.39,
-          0,
-        ),
-      );
-      leg.add(
-        this.mesh(
-          new T.CylinderGeometry(0.07, 0.052, 0.27, 8),
-          sock,
-          0,
-          -0.6,
-          0,
-        ),
-      );
-      const foot = this.mesh(
-        new T.SphereGeometry(0.1, 8, 6),
-        boot,
-        0,
-        -0.75,
-        0.045,
-      );
-      foot.scale.set(0.77, 0.55, 1.65);
-      leg.add(foot);
-      body.add(leg);
-      legs.push(leg);
-      const arm = new T.Group();
-      arm.position.set(sign * 0.27, 1.32, 0);
-      arm.rotation.z = sign * 0.12;
-      arm.add(
-        this.mesh(
-          new T.CylinderGeometry(0.105, 0.085, 0.24, 8),
-          jersey,
-          sign * 0.025,
-          -0.08,
-          0,
-        ),
-      );
-      arm.add(
-        this.mesh(
-          new T.CylinderGeometry(0.07, 0.05, 0.35, 8),
-          skinMat,
-          sign * 0.04,
-          -0.35,
-          0.025,
-        ),
-      );
-      arm.add(
-        this.mesh(
-          new T.SphereGeometry(0.06, 8, 6),
-          skinMat,
-          sign * 0.04,
-          -0.54,
-          0.025,
-        ),
-      );
-      body.add(arm);
-      arms.push(arm);
+      for (const player of this.match.players) {
+        const group = cloneSkeleton(footballer.scene) as T.Group;
+        const color =
+          player.slot === 0
+            ? player.team === 0
+              ? "#87df9c"
+              : "#e697f3"
+            : this.clubs[player.team].color;
+        const variation = appearanceVariation(player.data.id);
+        group.scale.set(variation.build, variation.height, variation.build);
+        group.userData.name = player.data.name;
+        group.traverse((object) => {
+          const mesh = object as T.SkinnedMesh;
+          if (!mesh.isMesh) return;
+          mesh.castShadow = this.settings.quality === "high";
+          mesh.frustumCulled = false;
+          const originals = Array.isArray(mesh.material)
+            ? mesh.material
+            : [mesh.material];
+          const customized = originals.map((source) => {
+            const next = source.clone() as T.MeshStandardMaterial;
+            if (next.name === "WB_Shirt" || next.name === "WB_Socks")
+              next.color.set(color);
+            else if (next.name === "WB_Shorts")
+              next.color.set(variation.shorts);
+            else if (next.name === "WB_Skin")
+              next.color.set(skinColors[player.data.skin] ?? skinColors[2]);
+            else if (next.name === "WB_Hair")
+              next.color.set(
+                [0x17110e, 0x2c1b12, 0x4a2c17, 0x0d0c0a][player.data.hair % 4],
+              );
+            else if (next.name === "WB_Boots") next.color.set(variation.boots);
+            next.roughness = Math.max(0.5, next.roughness);
+            return next;
+          });
+          mesh.material = Array.isArray(mesh.material)
+            ? customized
+            : customized[0];
+        });
+        this.addShirtNumber(group, player.number);
+        const mixer = new T.AnimationMixer(group);
+        const actions = new Map<string, T.AnimationAction>();
+        for (const [name, clip] of clips) {
+          const action = mixer.clipAction(clip);
+          if (!LOOPING_ANIMATIONS.has(name)) {
+            action.setLoop(T.LoopOnce, 1);
+            action.clampWhenFinished = true;
+          }
+          actions.set(name, action);
+        }
+        const idle = actions.get("idle");
+        idle?.play();
+        const avatar = { group, mixer, actions, active: "idle" };
+        this.avatars.push(avatar);
+        this.root.add(group);
+      }
+    } catch (error) {
+      if (this.disposed) return;
+      const message = document.createElement("div");
+      message.className = "renderer-error";
+      message.textContent = `Player assets could not load: ${(error as Error).message}`;
+      this.container.appendChild(message);
+      this.characterError = message;
     }
+  }
+  addShirtNumber(group: T.Group, number: number) {
     const canvas = document.createElement("canvas");
     canvas.width = 128;
     canvas.height = 128;
-    const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = "#101e19";
-    ctx.font = "bold 72px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(String(number), 64, 86);
+    const context = canvas.getContext("2d")!;
+    context.clearRect(0, 0, 128, 128);
+    context.fillStyle = "#f8f0d5";
+    context.strokeStyle = "#101b18";
+    context.lineWidth = 8;
+    context.font = "900 78px Arial";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.strokeText(String(number), 64, 68);
+    context.fillText(String(number), 64, 68);
     const texture = new T.CanvasTexture(canvas);
     texture.colorSpace = T.SRGBColorSpace;
     this.textures.push(texture);
-    const num = this.mesh(
+    const numberMesh = new T.Mesh(
       new T.PlaneGeometry(0.28, 0.28),
       new T.MeshBasicMaterial({
         map: texture,
         transparent: true,
         depthWrite: false,
+        side: T.DoubleSide,
       }),
-      0,
-      1.2,
-      -0.199,
     );
-    num.rotation.y = Math.PI;
-    body.add(num);
-    const badge = this.mesh(
-      new T.CircleGeometry(0.037, 8),
-      this.material("#fff3d8"),
-      -0.12,
-      1.31,
-      0.19,
-    );
-    body.add(badge);
-    // A single shared organic silhouette, with articulated joints; no cube avatars.
-    g.scale.setScalar(1.3);
-    g.userData.name = name;
-    return { group: g, body, legs, arms, number: String(number) };
+    numberMesh.name = "ShirtNumber";
+    numberMesh.position.set(0, 1.38, -0.205);
+    numberMesh.rotation.y = Math.PI;
+    group.add(numberMesh);
+  }
+  setAnimation(avatar: Avatar, name: string) {
+    if (avatar.active === name) return;
+    const next = avatar.actions.get(name) ?? avatar.actions.get("idle");
+    const previous = avatar.actions.get(avatar.active);
+    if (!next) return;
+    previous?.fadeOut(0.18);
+    next.reset().fadeIn(0.18).play();
+    avatar.active = name;
   }
   ballTexture() {
     const c = document.createElement("canvas");
@@ -629,6 +543,7 @@ export class Stadium {
     for (let i = 0; i < match.players.length; i++) {
       const p = match.players[i],
         a = this.avatars[i];
+      if (!a) continue;
       a.group.visible = !p.red && !p.injured;
       if (!a.group.visible) continue;
       a.group.position.set(p.x, 0, p.z);
@@ -636,17 +551,26 @@ export class Stadium {
       angle = Math.atan2(Math.sin(angle), Math.cos(angle));
       a.group.rotation.y += angle * Math.min(1, dt * 14);
       const speed = Math.hypot(p.vx, p.vz);
-      const swing =
-        Math.sin(this.frame * (speed > 7 ? 15 : 11) + i) *
-        Math.min(0.72, speed * 0.1);
-      a.legs[0].rotation.x = p.action > 0 ? -1.0 : swing;
-      a.legs[1].rotation.x = -swing;
-      a.arms[0].rotation.x = -swing * 0.75;
-      a.arms[1].rotation.x = swing * 0.75;
-      a.body.position.y =
-        speed > 0.5
-          ? Math.abs(Math.sin(this.frame * 12 + i)) * 0.045
-          : Math.sin(this.frame * 2 + i) * 0.008;
+      const animation =
+        p.action > 0
+          ? p.actionKind
+          : p.slot === 0 && speed < 0.8
+            ? "gk_stance"
+            : speed > 7.2
+              ? "sprint"
+              : speed > 1.1
+                ? "jog"
+                : "idle";
+      this.setAnimation(a, animation);
+      const active = a.actions.get(animation);
+      if (active)
+        active.timeScale =
+          animation === "jog"
+            ? clamp(speed / 5.2, 0.72, 1.35)
+            : animation === "sprint"
+              ? clamp(speed / 8.2, 0.8, 1.35)
+              : 1;
+      a.mixer.update(dt);
     }
     const b = match.ball;
     this.ball.position.set(b.x, b.y, b.z);
@@ -683,6 +607,7 @@ export class Stadium {
   dispose() {
     this.disposed = true;
     this.resize.disconnect();
+    this.avatars.forEach((avatar) => avatar.mixer.stopAllAction());
     this.scene.traverse((o) => {
       const m = o as T.Mesh;
       if (m.geometry) m.geometry.dispose();
@@ -692,12 +617,32 @@ export class Stadium {
       }
     });
     this.textures.forEach((t) => t.dispose());
+    this.characterError?.remove();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
 }
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
+}
+
+function appearanceVariation(id: string) {
+  let hash = 2166136261;
+  for (const character of id) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  const unit = (shift: number) => ((hash >>> shift) & 255) / 255;
+  return {
+    height: 0.94 + unit(0) * 0.12,
+    build: 0.93 + unit(8) * 0.11,
+    shorts: ["#111c1b", "#edf0df", "#20283a", "#281a1d"][
+      Math.floor(unit(16) * 4)
+    ],
+    boots: ["#111312", "#eceadf", "#c68124", "#192942"][
+      Math.floor(unit(20) * 4)
+    ],
+  };
 }
 
 export type StadiumView = Stadium;

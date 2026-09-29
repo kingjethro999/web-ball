@@ -11,6 +11,8 @@ export const LENGTH = 105,
   WIDTH = 68,
   GOAL = 7.32;
 export type Vec = { x: number; z: number };
+export type VisualAction =
+  "idle" | "pass" | "shoot" | "lob" | "tackle" | "gk_catch";
 export type Footballer = {
   data: Player;
   team: number;
@@ -25,6 +27,7 @@ export type Footballer = {
   red: boolean;
   injured: boolean;
   action: number;
+  actionKind: VisualAction;
   cooldown: number;
   number: number;
 };
@@ -124,6 +127,7 @@ export class Match {
           red: false,
           injured: false,
           action: 0,
+          actionKind: "idle",
           cooldown: 0,
           number: i + 1,
         }),
@@ -258,6 +262,7 @@ export class Match {
     this.ball.vy = height;
     this.ballLock = 0.2;
     p.action = 0.32;
+    p.actionKind = kind === "shot" ? "shoot" : kind;
     p.cooldown = 0.5;
     this.offsideIds.clear();
     this.shotTeam = kind === "shot" ? p.team : null;
@@ -354,6 +359,7 @@ export class Match {
       return;
     p.cooldown = 1.1;
     p.action = 0.4;
+    p.actionKind = "tackle";
     const behind = (p.x - other.x) * other.vx + (p.z - other.z) * other.vz < -1;
     const foul = this.random() < (manual ? (behind ? 0.45 : 0.12) : 0.018);
     if (foul) {
@@ -540,6 +546,7 @@ export class Match {
       if (this.phase !== "playing") return;
       p.cooldown = Math.max(0, p.cooldown - dt);
       p.action = Math.max(0, p.action - dt);
+      if (p.action === 0) p.actionKind = "idle";
       let tx = p.x,
         tz = p.z,
         sprint = false;
@@ -786,6 +793,7 @@ export class Match {
           ) {
             this.saves[p.team]++;
             p.action = 0.6;
+            p.actionKind = "gk_catch";
           }
           this.giveBall(p);
           p.cooldown = p.slot === 0 ? 0.8 : 0.1;
