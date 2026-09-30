@@ -39,3 +39,37 @@ The following are **project export destinations**, not claimed vendor download f
 Local Codex should first inspect the included GLTF in a GPU browser or Blender. Build the footballer adaptation from those human meshes; never rebuild a body from primitives. Validate bone naming/rest pose before reusing animation tracks; clone skeletons per player, share immutable meshes/textures, blend clips, and use a football-specific animation/event contract driven by the engine. Do not assume shared skeleton instances can have independent poses. Add foot planting and intentional contact timing, rather than merely moving the ball at an arbitrary pose.
 
 M1 must stay incomplete until close-up characters, kit variation, ball actions and all six cameras have actually been viewed and checked. The download browser timed out during this run; shell download succeeded, but new GPU visual verification did not.
+
+## Current supplied-asset pipeline (2026-09-30)
+
+The active runtime now uses `public/assets/supplied/footballer.glb`,
+`football-actions.glb` and `stadium.glb`. Earlier destinations above document the
+rejected first attempt. Do not switch back to MPFB or primitive characters.
+
+Rebuild with Blender 5.2 (source files are never changed):
+
+```sh
+blender -b -P tools/blender/build_supplied_player.py -- /home/king/Downloads/player/glb/football_player.glb public/assets/supplied
+blender -b -P tools/blender/build_supplied_stadium.py -- 'artifacts/supplied/stadium1/Stad de tanger.blend' public/assets/supplied/stadium.glb
+npm run assets:check
+```
+
+Stadium 1's `.blend` and `Texture/` folder must be extracted beside one another.
+The player contains a 25-joint skin already; its importer bind orientation must
+be normalized before retargeting. Never copy local Euler tracks between rigs.
+The build writes 19 named clips and a 37,286-triangle player with a 2048px atlas.
+`COLOR_1` carries a fabric mask used by `src/player-material.ts`; `COLOR_0` stays
+neutral. Preserve both attributes. Stadium geometry is Draco-compressed; its
+WASM decoder is bundled locally, with no CDN dependency.
+
+Development review pages (run `npm run dev`):
+
+- `/tools/runtime/asset-review.html`: orbit the player, scrub every clip, change
+  kit colour, and compare front/side/back. Animation is paused by default.
+- `/tools/runtime/match-review.html`: deterministic 22-player scene and six
+  camera views. These are inspection tools, not a replacement for playtesting.
+
+`tools/blender/review_supplied.py` records source inventory and renders source
+views; `review_player_actions.py` renders the exported rig and exported clips.
+Local evidence lives in `artifacts/supplied-review/`. A successful export, build
+or test is not sufficient to mark M1 complete.

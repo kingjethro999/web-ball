@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "start": "node --import tsx server/index.ts",
     "test": "node --import tsx --test test/*.test.ts",
-    "db:migrate": "node --import tsx server/migrate.ts"
+    "db:migrate": "node --import tsx server/migrate.ts",
+    "assets:check": "node tools/validate-supplied-assets.mjs"
   },
   "dependencies": {
     "dotenv": "^18.0.4",

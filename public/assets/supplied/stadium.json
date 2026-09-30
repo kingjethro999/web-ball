@@ -1,0 +1,44 @@
+{
+  "source_sha256": "da3c49bab3b19a7b27f511787187065bf7e6e3e511bee781ab5c36bb2608088c",
+  "triangles": 477573,
+  "missing_source_textures": [
+    "Carpet_Aqua1.jpg",
+    "Carpet_Frieze_Blue.jpg",
+    "Couro_Azul.jpg",
+    "Couro_branco.jpg",
+    "Logo.png",
+    "MADE BY.psd",
+    "Phoenix_Civic_Plaza_31.jpg",
+    "SerrArena_letreiro1.png"
+  ],
+  "pitch": [
+    105,
+    68
+  ],
+  "source_to_pitch": [
+    [
+      0.0,
+      1.0,
+      0.0,
+      -0.4090000092983246
+    ],
+    [
+      -1.0,
+      0.0,
+      0.0,
+      -28.680500030517578
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      -5.611999988555908
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ]
+}

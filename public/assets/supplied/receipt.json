@@ -1,0 +1,27 @@
+{
+  "source_sha256": "6f6c1b5f9cd6bb600500b03a6c100aed777d72521574c4e115d3fe736df9ab02",
+  "triangles": 37286,
+  "match_triangles": 11185,
+  "bones": 25,
+  "animations": [
+    "idle",
+    "walk",
+    "jog",
+    "sprint",
+    "pass",
+    "shoot",
+    "lob",
+    "gk_punt",
+    "turn",
+    "tackle",
+    "slide",
+    "header",
+    "gk_stance",
+    "gk_dive_left",
+    "gk_dive_right",
+    "gk_catch",
+    "celebrate",
+    "dejected",
+    "referee_signal"
+  ]
+}

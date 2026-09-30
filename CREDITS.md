@@ -27,3 +27,27 @@ Lucide icons — ISC license, installed through npm; preserve the package licens
 Three.js — MIT; React — MIT. Dependencies and transitive versions are recorded in `package-lock.json`; preserve their respective package licenses.
 
 Fictional club names, procedural crests, pitch/crowd art, interface and synthesized effects were created for this project. The legacy primitive character renderer and software renderer are rejected prototype work, not the desired art direction. No real club/player branding, proprietary FIFA/DLS assets, or Mixamo files are bundled.
+
+## Supplied player and stadium — 2026-09-30
+
+King Jethro supplied the local `Downloads/player`, `Downloads/stadium1` and
+`Downloads/stadium2` packages and stated that he created them and retrieved them
+from his Google Drive. The active player and Stadium 1 exports are in
+`public/assets/supplied/`; their receipts record source hashes. Source archives
+remain untouched. The archives also contain older third-party metadata; no new
+independent authorship or licensing verification is claimed here.
+
+The player retains its original mesh, texture and skin weights, with the visible
+bind pose normalized, geometry reduced, and a fabric mask added. Walk, jog,
+sprint and idle are retargeted from the CC0 Quaternius animation library credited
+above. Football and goalkeeper clips are locally authored. The previous
+Quaternius/MPFB character adaptations are rejected experiments and are no longer
+the active character.
+
+Stadium 1 retains its supplied architecture and seat atlas. Its legacy materials
+are converted to PBR; missing auxiliary texture files use material colours. Its
+embedded ground is replaced by the game's regulation pitch. Stadium 2 remains a
+source candidate: its 6.16 million triangles exceed the runtime budget.
+
+**Google Draco decoder** — Apache License 2.0. Decoder files copied from the
+installed Three.js package; notice preserved at `public/assets/draco/LICENSE`.
