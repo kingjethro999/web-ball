@@ -96,6 +96,8 @@ def main() -> None:
     samples = {
         "rest": (None, 0.0),
         "idle": ("idle", 0.45),
+        "jog": ("jog", 0.32),
+        "sprint": ("sprint", 0.28),
         "pass": ("pass", 0.58),
         "shoot": ("shoot", 0.56),
         "lob": ("lob", 0.58),

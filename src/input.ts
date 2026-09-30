@@ -13,7 +13,11 @@ export class Controls {
     document.addEventListener("visibilitychange", this.visibility);
   }
   down = (e: KeyboardEvent) => {
-    if ((e.target as HTMLElement)?.matches("input,textarea,select")) return;
+    if (
+      e.target instanceof Element &&
+      e.target.matches("input,textarea,select")
+    )
+      return;
     const keys = [
       "KeyW",
       "KeyA",

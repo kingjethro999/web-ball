@@ -1801,8 +1801,11 @@ function MatchScreen({
   useEffect(() => {
     const cycleCamera = (event: KeyboardEvent) => {
       if (event.code !== "KeyC" || event.repeat) return;
-      const target = event.target as HTMLElement | null;
-      if (target?.matches("input, select, textarea")) return;
+      if (
+        event.target instanceof Element &&
+        event.target.matches("input, select, textarea")
+      )
+        return;
       const current = CAMERA_MODES.indexOf(settings.camera);
       const camera = CAMERA_MODES[(current + 1) % CAMERA_MODES.length];
       updateSettings({ ...settings, camera });

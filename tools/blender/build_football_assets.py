@@ -175,24 +175,33 @@ def football_actions(armature: bpy.types.Object) -> list[bpy.types.Action]:
     return [create_action(armature, name, frames, cyclic) for name, frames, cyclic in specs]
 
 
+def locomotion_actions(armature: bpy.types.Object) -> list[bpy.types.Action]:
+    neutral_arms = {
+        "upperarm_l": (4, 0, -66),
+        "upperarm_r": (-4, 0, 66),
+        "lowerarm_l": (-8, 0, -5),
+        "lowerarm_r": (-8, 0, 5),
+    }
+    idle_a = {**neutral_arms, "spine_02": (-2, 0, 0), "Head": (1, 0, 0)}
+    idle_b = {**neutral_arms, "spine_02": (2, 0, 0), "Head": (-1, 0, 0)}
+    specs = [
+        ("idle", [(1, idle_a, {}), (30, idle_b, {"pelvis": (0, 0, 0.012)}), (60, idle_a, {})], True),
+        ("walk", [(1, {**neutral_arms, "thigh_l": (24, 0, 0), "calf_l": (-8, 0, 0), "thigh_r": (-24, 0, 0), "calf_r": (28, 0, 0), "upperarm_l": (-18, 0, -62), "upperarm_r": (18, 0, 62)}, {}), (9, {**neutral_arms, "thigh_l": (0, 0, 0), "calf_l": (18, 0, 0), "thigh_r": (0, 0, 0), "calf_r": (4, 0, 0)}, {"pelvis": (0, 0, 0.025)}), (17, {**neutral_arms, "thigh_l": (-24, 0, 0), "calf_l": (28, 0, 0), "thigh_r": (24, 0, 0), "calf_r": (-8, 0, 0), "upperarm_l": (18, 0, -62), "upperarm_r": (-18, 0, 62)}, {}), (25, {**neutral_arms, "thigh_l": (0, 0, 0), "calf_l": (4, 0, 0), "thigh_r": (0, 0, 0), "calf_r": (18, 0, 0)}, {"pelvis": (0, 0, 0.025)}), (33, {**neutral_arms, "thigh_l": (24, 0, 0), "calf_l": (-8, 0, 0), "thigh_r": (-24, 0, 0), "calf_r": (28, 0, 0), "upperarm_l": (-18, 0, -62), "upperarm_r": (18, 0, 62)}, {})], True),
+        ("jog", [(1, {**neutral_arms, "spine_02": (8, 0, 0), "thigh_l": (38, 0, 0), "calf_l": (-12, 0, 0), "thigh_r": (-34, 0, 0), "calf_r": (52, 0, 0), "upperarm_l": (-32, 0, -58), "upperarm_r": (34, 0, 58)}, {"pelvis": (0, 0, 0.02)}), (7, {**neutral_arms, "spine_02": (10, 0, 0), "thigh_l": (0, 0, 0), "calf_l": (32, 0, 0), "thigh_r": (0, 0, 0), "calf_r": (12, 0, 0)}, {"pelvis": (0, 0, 0.075)}), (13, {**neutral_arms, "spine_02": (8, 0, 0), "thigh_l": (-34, 0, 0), "calf_l": (52, 0, 0), "thigh_r": (38, 0, 0), "calf_r": (-12, 0, 0), "upperarm_l": (34, 0, -58), "upperarm_r": (-32, 0, 58)}, {"pelvis": (0, 0, 0.02)}), (19, {**neutral_arms, "spine_02": (10, 0, 0), "thigh_l": (0, 0, 0), "calf_l": (12, 0, 0), "thigh_r": (0, 0, 0), "calf_r": (32, 0, 0)}, {"pelvis": (0, 0, 0.075)}), (25, {**neutral_arms, "spine_02": (8, 0, 0), "thigh_l": (38, 0, 0), "calf_l": (-12, 0, 0), "thigh_r": (-34, 0, 0), "calf_r": (52, 0, 0), "upperarm_l": (-32, 0, -58), "upperarm_r": (34, 0, 58)}, {"pelvis": (0, 0, 0.02)})], True),
+        ("sprint", [(1, {**neutral_arms, "spine_02": (17, 0, 0), "thigh_l": (54, 0, 0), "calf_l": (-18, 0, 0), "thigh_r": (-48, 0, 0), "calf_r": (68, 0, 0), "upperarm_l": (-48, 0, -52), "upperarm_r": (50, 0, 52)}, {"pelvis": (0, 0, 0.04)}), (5, {**neutral_arms, "spine_02": (20, 0, 0), "thigh_l": (0, 0, 0), "calf_l": (42, 0, 0), "thigh_r": (0, 0, 0), "calf_r": (18, 0, 0)}, {"pelvis": (0, 0, 0.13)}), (9, {**neutral_arms, "spine_02": (17, 0, 0), "thigh_l": (-48, 0, 0), "calf_l": (68, 0, 0), "thigh_r": (54, 0, 0), "calf_r": (-18, 0, 0), "upperarm_l": (50, 0, -52), "upperarm_r": (-48, 0, 52)}, {"pelvis": (0, 0, 0.04)}), (13, {**neutral_arms, "spine_02": (20, 0, 0), "thigh_l": (0, 0, 0), "calf_l": (18, 0, 0), "thigh_r": (0, 0, 0), "calf_r": (42, 0, 0)}, {"pelvis": (0, 0, 0.13)}), (17, {**neutral_arms, "spine_02": (17, 0, 0), "thigh_l": (54, 0, 0), "calf_l": (-18, 0, 0), "thigh_r": (-48, 0, 0), "calf_r": (68, 0, 0), "upperarm_l": (-48, 0, -52), "upperarm_r": (50, 0, 52)}, {"pelvis": (0, 0, 0.04)})], True),
+    ]
+    return [create_action(armature, name, frames, cyclic) for name, frames, cyclic in specs]
+
+
 def export_actions() -> None:
     reset()
     bpy.ops.import_scene.gltf(filepath=str(LOCOMOTION))
     armature = next(obj for obj in bpy.context.scene.objects if obj.type == "ARMATURE")
     armature.name = "FootballerRig"
 
-    keep = {
-        "Idle_Loop": "idle",
-        "Walk_Loop": "walk",
-        "Jog_Fwd_Loop": "jog",
-        "Sprint_Loop": "sprint",
-    }
     for action in list(bpy.data.actions):
-        if action.name in keep:
-            action.name = keep[action.name]
-        else:
-            bpy.data.actions.remove(action)
-    actions = list(bpy.data.actions)
+        bpy.data.actions.remove(action)
+    actions = locomotion_actions(armature)
     actions.extend(football_actions(armature))
 
     for obj in list(bpy.context.scene.objects):
