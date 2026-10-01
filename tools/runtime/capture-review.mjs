@@ -50,7 +50,29 @@ try {
   await cmd("Page.bringToFront");
   if (expression === "reload") {
     await cmd("Page.reload");
-    console.log("Reload requested");
+    // Wait for the new document's assets, so the next capture cannot select
+    // a stale duplicate tab while this page is still navigating.
+    await new Promise((r) => setTimeout(r, 250));
+    let ready = false;
+    for (let attempt = 0; attempt < 60; attempt++) {
+      try {
+        const check = await cmd("Runtime.evaluate", {
+          expression: page.url.includes("match-review")
+            ? "!!window.matchReviewReady"
+            : "!!window.reviewReady",
+          returnByValue: true,
+        });
+        if (check.result.value) {
+          ready = true;
+          break;
+        }
+      } catch {
+        // The execution context may be replaced during navigation.
+      }
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    if (!ready) throw Error("Reloaded review assets did not become ready");
+    console.log("Reloaded review assets are ready");
   } else {
     if (
       page.url.includes("asset-review") ||
