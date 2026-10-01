@@ -255,8 +255,8 @@ for name,strength in [('pass',.6),('shoot',1),('lob',.75),('gk_punt',.95)]:
     authored(name,.9,[neutral,(.3,{'RightUpLeg_05':(35*strength,0,0),'RightLeg_06':(65*strength,0,0),'LeftArm_013':(-18,0,-12),'RightArm_017':(22,0,15),'Spine_011':(4,0,-8)},(0,0,-.025)),(.55,{'RightUpLeg_05':(-65*strength,0,-8),'RightLeg_06':(12,0,0),'LeftArm_013':(-15,-30,0),'RightArm_017':(15,24,0),'LeftForeArm_014':(-25,0,0),'RightForeArm_018':(-25,0,0),'Spine_011':(-8,0,12)},(0,0,0)),end])
 authored('turn',.5,[neutral,(.5,{'Hips_00':(0,0,22),'Spine_011':(0,0,-14)},(0,0,-.02)),end])
 authored('tackle',.65,[neutral,(.45,{'RightUpLeg_05':(-40,0,-8),'RightLeg_06':(15,0,0),'LeftUpLeg_01':(-20,0,0),'LeftLeg_02':(35,0,0),'Spine_011':(15,0,0),'LeftArm_013':(0,-22,0),'RightArm_017':(0,22,0)},(0,0,-.1)),end])
-slide_pose={'Hips_00':(-65,0,0),'Spine_011':(15,0,0),'LeftUpLeg_01':(-60,0,-12),'LeftLeg_02':(145,0,0),'LeftFoot_03':(-20,0,0),'RightUpLeg_05':(-15,0,0),'RightLeg_06':(0,0,0),'RightFoot_07':(80,0,0),'LeftArm_013':(65,-30,0),'RightArm_017':(-15,30,0),'RightForeArm_018':(-25,0,0)}
-authored('slide',1.2,[neutral,(.25,slide_pose,(0,0,-.70)),(.65,slide_pose,(0,0,-.72)),end])
+slide_pose={'Hips_00':(-65,0,0),'Spine_011':(15,0,0),'LeftUpLeg_01':(-90,0,-12),'LeftLeg_02':(145,0,0),'LeftFoot_03':(-20,0,0),'RightUpLeg_05':(-30,0,0),'RightLeg_06':(0,0,0),'RightFoot_07':(95,0,0),'LeftArm_013':(55,-35,0),'LeftForeArm_014':(-90,0,0),'RightArm_017':(55,35,0),'RightForeArm_018':(-65,0,0)}
+authored('slide',1.2,[neutral,(.25,slide_pose,(0,0,-.85)),(.65,slide_pose,(0,0,-.87)),end])
 authored('header',.85,[neutral,(.4,{'Spine_011':(-15,0,0),'LeftArm_013':(-25,-25,0),'RightArm_017':(-25,25,0)},(0,0,.18)),(.6,{'Spine_011':(20,0,0),'Head_021':(15,0,0)},(0,-.05,.13)),end])
 stance={'LeftUpLeg_01':(-25,-8,0),'RightUpLeg_05':(-25,8,0),'LeftLeg_02':(48,0,0),'RightLeg_06':(48,0,0),'Spine_011':(12,0,0),'LeftArm_013':(-15,-20,0),'RightArm_017':(-15,20,0),'LeftForeArm_014':(-40,0,0),'RightForeArm_018':(-40,0,0)}
 authored('gk_stance',2,[(0,stance,(0,0,-.09)),(.5,stance,(0,0,-.1)),(1,stance,(0,0,-.09))])
