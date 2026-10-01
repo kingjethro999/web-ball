@@ -17,7 +17,7 @@ import {
   type MatchResult,
 } from "../src/domain";
 import { careerSchema, settingsSchema } from "../src/storage";
-import { Match, emptyInput } from "../src/engine";
+import { Match, emptyInput, BALL_RADIUS } from "../src/engine";
 function setup() {
   return new Match(
     roster(CLUBS[0]).slice(0, 11),
@@ -275,4 +275,28 @@ test("AI simulation stays finite and reaches halftime after three real minutes",
   );
   assert.ok(Number.isFinite(m.ball.x));
   assert.ok(m.shots[0] + m.shots[1] > 0);
+});
+
+// Regression for the oversized ball: check real scale, contact height and the
+// whole-ball goal threshold together, rather than a renderer-only shrink.
+test("ball has football scale, rests on its radius and crosses the goal fully", () => {
+  assert.ok(
+    2 * Math.PI * BALL_RADIUS >= 0.68 && 2 * Math.PI * BALL_RADIUS <= 0.7,
+  );
+  const m = setup();
+  assert.equal(m.ball.y, BALL_RADIUS);
+  m.phase = "playing";
+  m.owner = null;
+  m.players.forEach((p) => {
+    p.x = 0;
+    p.z = 25;
+  });
+  m.ball = { x: 20, z: 0, y: BALL_RADIUS, vx: 0, vz: 0, vy: -1 };
+  m.update(1 / 60, emptyInput());
+  assert.equal(m.ball.y, BALL_RADIUS);
+  m.ball = { x: 52.5 + BALL_RADIUS - 0.015, z: 0, y: 0.5, vx: 1, vz: 0, vy: 0 };
+  m.update(0.01, emptyInput());
+  assert.deepEqual(m.score, [0, 0]);
+  m.update(0.01, emptyInput());
+  assert.equal(m.score[0] + m.score[1], 1);
 });

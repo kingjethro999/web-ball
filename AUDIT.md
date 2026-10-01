@@ -1,5 +1,20 @@
 # Audit and continuation status — 2026-09-28
 
+## Updated checkpoint — 2026-10-01
+
+This section supersedes the September checkpoint's asset, GPU and GitHub status below. **M1 remains incomplete.** The active renderer now loads King's supplied skinned footballer and covered stadium, rather than the rejected superhero or primitive characters. The repository is `kingjethro999/web-ball` and verified checkpoints are pushed to `main`.
+
+- Rebuilt the visible bind skeleton; constrained torso, clavicle, elbow and wrist motion rather than copying incompatible stylized upper-body rotations. Joined and welded the source skin before reduction: boundary edges fell from 27,696 to 15, removing visible small cracks in skin and clothing.
+- Exported 25-joint, 37,286-triangle close models and matching 11,184-triangle distant models with 19 clips. Runtime clones have separate skeletons and animation mixers. Skin/piping remain separate from fabric tint; shirt numbers attach to the spine.
+- Shared 0.11 m ball radius between rendering and physics, including ground contact and full-ball line crossing. Match duration remains 360 playing seconds, with halftime at 180.
+- Reviewed the model, running recording, keeper dive and slide in hardware WebGL on this PC; inspected all six camera views with 22 players and advanced a short movement/pass scenario. This does not establish sustained frame rate, phone support or physical gamepad support.
+- At 48 phases per clip, minimum skin height was +3.0 mm idle, +2.8 mm walk, -0.9 mm jog, -3.4 mm sprint, -2.5 mm shoot, -2.4 mm pass, +3.0 mm keeper stance/catch, +5.0 mm left dive and +4.9 mm slide. Earlier dives/slide penetrated by 327/439 mm. Running flight phases are retained. These measurements check mesh height, not full biomechanical correctness or blend contacts.
+- `npm run assets:check`, `npm test` (19 passed), and `npm run build` passed. The approximately 1.04 MB JavaScript bundle warning remains.
+
+Remaining visual defects: the slide is too propped up; faint source shirt-lettering traces remain after color cleanup; crowd, stadium lighting and appearance diversity are unfinished. Authored football clips need further timing and motion refinement; the engine currently uses only a subset, including a generic keeper catch. Full keeper dive selection, strafing/backpedaling, smooth support-foot blending and prolonged interactive playtesting remain M1 work. Stadium 2 has only been inspected as source metadata and has not been visually accepted or integrated.
+
+Reproducible review pages: `/tools/runtime/asset-review.html` and `/tools/runtime/match-review.html` during `npm run dev`. Local screenshots, a four-second jogging recording and measurement JSON are under `artifacts/supplied-review/browser/`; captures use `tools/runtime/capture-review.mjs` against a Chrome review session on port 9222. These development pages are not included in the production entry point.
+
 ## Read first
 
 This ZIP is an **unfinished continuation checkpoint**, not completion of M1–M6. Read SPEC.md and docs/reference/chat.txt. The current footballer renderer is still legacy procedural geometry, explicitly rejected by the user. Downloaded humanoid assets are source material only. Do not tell the user the character overhaul is finished.

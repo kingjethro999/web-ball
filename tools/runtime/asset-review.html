@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><title>Web Ball — asset review</title>
+  <style>
+    body {
+      margin: 0;
+      background: #172322;
+      color: #e5efdf;
+      font: 15px system-ui;
+    }
+    header {
+      position: absolute;
+      z-index: 2;
+      top: 16px;
+      left: 20px;
+    }
+    button,
+    select,
+    input {
+      margin: 5px;
+      padding: 8px;
+      background: #293c36;
+      color: #fff;
+      border: 1px solid #688777;
+      border-radius: 4px;
+    }
+    small {
+      display: block;
+    }
+    canvas {
+      display: block;
+    }
+    #status {
+      color: #efca72;
+    }
+  </style>
+  <header>
+    <strong>WEB BALL / PLAYER REVIEW</strong>
+    <div>
+      <select id="clip"></select
+      ><button id="play">Play</button
+      ><input
+        id="time"
+        type="range"
+        min="0"
+        max="1"
+        step=".01"
+        value="0"
+      /><button id="front">Front</button><button id="side">Side</button
+      ><button id="back">Back</button><button id="kit">Change kit</button>
+    </div>
+    <small id="status">Loading supplied footballer…</small>
+  </header>
+  <script type="module" src="/src/asset-review.ts"></script>
+</html>

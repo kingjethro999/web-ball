@@ -10,6 +10,8 @@ import {
 export const LENGTH = 105,
   WIDTH = 68,
   GOAL = 7.32;
+// 22 cm diameter: 69.1 cm circumference. Shared by physics and rendering.
+export const BALL_RADIUS = 0.11;
 export type Vec = { x: number; z: number };
 export type VisualAction =
   "idle" | "pass" | "shoot" | "lob" | "tackle" | "gk_catch";
@@ -62,7 +64,7 @@ export type Phase =
 export class Match {
   id: string;
   players: Footballer[] = [];
-  ball = { x: 0, z: 0, y: 0.22, vx: 0, vz: 0, vy: 0 };
+  ball = { x: 0, z: 0, y: BALL_RADIUS, vx: 0, vz: 0, vy: 0 };
   owner: Footballer | null = null;
   selected = 9;
   score: [number, number] = [0, 0];
@@ -162,7 +164,7 @@ export class Match {
       if (p.slot > 0 && p.x * d > -2) p.x = -2 * d - Math.abs(p.z) * 0.12;
     }
     this.restartExempt = false;
-    this.ball = { x: 0, z: 0, y: 0.22, vx: 0, vz: 0, vy: 0 };
+    this.ball = { x: 0, z: 0, y: BALL_RADIUS, vx: 0, vz: 0, vy: 0 };
     this.owner = null;
     this.lastPass = null;
     this.assistCandidate = null;
@@ -237,7 +239,7 @@ export class Match {
     this.owner = p;
     this.lastTouch = p.team;
     this.ball.vx = this.ball.vz = this.ball.vy = 0;
-    this.ball.y = 0.22;
+    this.ball.y = BALL_RADIUS;
     this.offsideIds.clear();
     this.shotTeam = null;
     if (!p.team) this.selected = this.players.indexOf(p);
@@ -425,7 +427,7 @@ export class Match {
       z: clamp(pos.z, -33.5, 33.5),
     };
     this.owner = null;
-    this.ball = { ...this.restartPos, y: 0.22, vx: 0, vz: 0, vy: 0 };
+    this.ball = { ...this.restartPos, y: BALL_RADIUS, vx: 0, vz: 0, vy: 0 };
     this.ballLock = 0.5;
     this.lastPass = null;
     this.assistCandidate = null;
@@ -688,7 +690,7 @@ export class Match {
             : { x: this.direction(p.team), z: 0 };
         this.ball.x = p.x + d.x * 0.75;
         this.ball.z = p.z + d.z * 0.75;
-        this.ball.y = 0.22 + Math.abs(Math.sin(this.tick * 14)) * 0.045;
+        this.ball.y = BALL_RADIUS + Math.abs(Math.sin(this.tick * 14)) * 0.045;
       }
     } else {
       const b = this.ball;
@@ -697,8 +699,8 @@ export class Match {
       b.z += b.vz * dt;
       b.y += b.vy * dt;
       b.vy -= 9.81 * dt;
-      if (b.y < 0.22) {
-        b.y = 0.22;
+      if (b.y < BALL_RADIUS) {
+        b.y = BALL_RADIUS;
         b.vy = Math.abs(b.vy) > 0.8 ? -b.vy * 0.44 : 0;
       }
       const drag = Math.exp(-(b.y > 0.3 ? 0.08 : 0.7) * dt);
@@ -708,7 +710,7 @@ export class Match {
       if (
         Math.abs(b.x) > 51.95 &&
         Math.abs(b.x) < 53 &&
-        Math.abs(Math.abs(b.z) - 3.66) < 0.28 &&
+        Math.abs(Math.abs(b.z) - GOAL / 2) < BALL_RADIUS + 0.06 &&
         b.y < 2.65
       ) {
         b.vx *= -0.65;
@@ -719,15 +721,21 @@ export class Match {
         Math.abs(b.x) > 51.95 &&
         Math.abs(b.x) < 53 &&
         Math.abs(b.z) < 3.8 &&
-        Math.abs(b.y - 2.44) < 0.22
+        Math.abs(b.y - 2.44) < BALL_RADIUS + 0.06
       ) {
         b.vx *= -0.65;
         b.vy *= -0.5;
         b.x = Math.sign(b.x) * 51.9;
         this.event("Off the crossbar!", "info");
       }
-      if (Math.abs(b.x) > 52.72 && Math.abs(prevX) <= 52.72) {
-        if (Math.abs(b.z) < 3.44 && b.y < 2.22) {
+      if (
+        Math.abs(b.x) > LENGTH / 2 + BALL_RADIUS &&
+        Math.abs(prevX) <= LENGTH / 2 + BALL_RADIUS
+      ) {
+        if (
+          Math.abs(b.z) < GOAL / 2 - BALL_RADIUS &&
+          b.y < 2.44 - BALL_RADIUS
+        ) {
           const scoring = this.direction(0) === Math.sign(b.x) ? 0 : 1;
           this.score[scoring]++;
           const scorer =
@@ -768,7 +776,7 @@ export class Match {
           });
         return;
       }
-      if (Math.abs(b.z) > 34.22) {
+      if (Math.abs(b.z) > WIDTH / 2 + BALL_RADIUS) {
         this.restart("THROW IN", 1 - this.lastTouch, {
           x: clamp(b.x, -51, 51),
           z: Math.sign(b.z) * 33.5,

@@ -1,7 +1,9 @@
 import * as T from "three";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone as cloneSkeleton } from "three/addons/utils/SkeletonUtils.js";
-import { Match } from "./engine";
+import { suppliedKit } from "./player-material";
+import { Match, BALL_RADIUS } from "./engine";
 import { type Club, type Settings, rng } from "./domain";
 const skinColors = [0xf2c6a6, 0xc99168, 0x9c6246, 0x714731, 0x4c3027];
 const LOOPING_ANIMATIONS = new Set([
@@ -18,6 +20,7 @@ type Avatar = {
   mixer: T.AnimationMixer;
   actions: Map<string, T.AnimationAction>;
   active: string;
+  lod: { mesh: T.Mesh; near: T.BufferGeometry; far: T.BufferGeometry }[];
 };
 export class Stadium {
   renderer: T.WebGLRenderer;
@@ -36,6 +39,8 @@ export class Stadium {
   materials: T.Material[] = [];
   textures: T.Texture[] = [];
   characterError?: HTMLElement;
+  contactShadows: T.InstancedMesh;
+  shadowTransform = new T.Object3D();
   constructor(
     public container: HTMLElement,
     public match: Match,
@@ -55,7 +60,7 @@ export class Stadium {
     this.renderer.shadowMap.type = T.PCFSoftShadowMap;
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     this.renderer.toneMapping = T.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.13;
+    this.renderer.toneMappingExposure = 1.0;
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.setAttribute(
       "aria-label",
@@ -64,9 +69,9 @@ export class Stadium {
     this.scene.background = new T.Color("#101c20");
     this.scene.fog = new T.Fog("#172626", 100, 235);
     this.scene.add(this.root);
-    const hemi = new T.HemisphereLight(0xe7f1ff, 0x5c7050, 2.2);
+    const hemi = new T.HemisphereLight(0xe7f1ff, 0x5c7050, 1.4);
     this.scene.add(hemi);
-    const sun = new T.DirectionalLight(0xfff4da, 3.1);
+    const sun = new T.DirectionalLight(0xfff4da, 2.2);
     sun.position.set(-28, 70, 25);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -80,11 +85,32 @@ export class Stadium {
     });
     sun.shadow.bias = -0.0003;
     this.scene.add(sun);
+    const shadowCanvas = document.createElement("canvas");
+    shadowCanvas.width = shadowCanvas.height = 64;
+    const shadowContext = shadowCanvas.getContext("2d")!;
+    const gradient = shadowContext.createRadialGradient(32, 32, 3, 32, 32, 32);
+    gradient.addColorStop(0, "rgba(0,0,0,.38)");
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    shadowContext.fillStyle = gradient;
+    shadowContext.fillRect(0, 0, 64, 64);
+    const shadowTexture = new T.CanvasTexture(shadowCanvas);
+    this.textures.push(shadowTexture);
+    this.contactShadows = new T.InstancedMesh(
+      new T.PlaneGeometry(1.5, 1.05).rotateX(-Math.PI / 2),
+      new T.MeshBasicMaterial({
+        map: shadowTexture,
+        transparent: true,
+        depthWrite: false,
+      }),
+      match.players.length,
+    );
+    this.contactShadows.frustumCulled = false;
+    this.root.add(this.contactShadows);
     this.pitch();
-    this.stands();
+    void this.loadStadium();
     void this.loadPlayers();
     this.ball = new T.Mesh(
-      new T.SphereGeometry(0.23, 16, 12),
+      new T.SphereGeometry(BALL_RADIUS, 24, 16),
       new T.MeshStandardMaterial({ map: this.ballTexture(), roughness: 0.6 }),
     );
     this.ball.castShadow = true;
@@ -155,17 +181,47 @@ export class Stadium {
     pitch.receiveShadow = true;
     pitch.castShadow = false;
     this.root.add(pitch);
-    const white = new T.LineBasicMaterial({
+    const white = new T.MeshBasicMaterial({
       color: 0xdfebd7,
-      transparent: true,
-      opacity: 0.85,
+      side: T.DoubleSide,
     });
     const line = (points: number[][]) => {
-      const geo = new T.BufferGeometry().setFromPoints(
-        points.map(([x, z]) => new T.Vector3(x, 0.035, z)),
+      const vertices: number[] = [];
+      // Twelve-centimetre painted ribbons retain physical width in close views.
+      for (let i = 1; i < points.length; i++) {
+        const [ax, az] = points[i - 1],
+          [bx, bz] = points[i];
+        const length = Math.hypot(bx - ax, bz - az);
+        if (!length) continue;
+        const dx = (-(bz - az) / length) * 0.06;
+        const dz = ((bx - ax) / length) * 0.06;
+        vertices.push(
+          ax + dx,
+          0.036,
+          az + dz,
+          ax - dx,
+          0.036,
+          az - dz,
+          bx + dx,
+          0.036,
+          bz + dz,
+          bx + dx,
+          0.036,
+          bz + dz,
+          ax - dx,
+          0.036,
+          az - dz,
+          bx - dx,
+          0.036,
+          bz - dz,
+        );
+      }
+      const geometry = new T.BufferGeometry();
+      geometry.setAttribute(
+        "position",
+        new T.Float32BufferAttribute(vertices, 3),
       );
-      const obj = new T.Line(geo, white);
-      this.root.add(obj);
+      this.root.add(new T.Mesh(geometry, white));
     };
     const rect = (x: number, z: number, w: number, h: number) =>
       line([
@@ -284,117 +340,43 @@ export class Stadium {
       ),
     );
   }
-  stands() {
-    const concrete = this.material("#23322e");
-    for (const side of [-1, 1])
-      for (let row = 0; row < 7; row++) {
-        const platform = this.mesh(
-          new T.BoxGeometry(143, 1.1, 2.5),
-          concrete,
-          0,
-          row * 1.2 + 0.6,
-          side * (45 + row * 2.5),
-        );
-        platform.receiveShadow = true;
-        this.root.add(platform);
-      }
-    const r = rng(401),
-      crowd = new T.InstancedMesh(
-        new T.SphereGeometry(0.27, 5, 4),
-        this.material("#8eaaa2"),
-        7 * 140 * 2,
-      );
-    const m = new T.Matrix4(),
-      q = new T.Quaternion();
-    let i = 0;
-    for (const side of [-1, 1])
-      for (let row = 0; row < 7; row++)
-        for (let col = 0; col < 140; col++) {
-          m.compose(
-            new T.Vector3(
-              col - 69.5,
-              1.65 + row * 1.2,
-              side * (45 + row * 2.5),
-            ),
-            q,
-            new T.Vector3(1, 1.9, 1),
-          );
-          crowd.setMatrixAt(i, m);
-          crowd.setColorAt(
-            i,
-            new T.Color(
-              [
-                0x667568, 0x83948b, 0x3b5247, 0xb99853, 0x233e42, 0xa5b0ab,
-                0x566582,
-              ][Math.floor(r() * 7)],
-            ),
-          );
-          i++;
-        }
-    this.root.add(crowd);
-    for (const side of [-1, 1])
-      for (let i = 0; i < 10; i++) {
-        const canvas = document.createElement("canvas");
-        canvas.width = 512;
-        canvas.height = 64;
-        const c = canvas.getContext("2d")!;
-        c.fillStyle = i % 2 ? "#f2c652" : "#142823";
-        c.fillRect(0, 0, 512, 64);
-        c.fillStyle = i % 2 ? "#19251f" : "#dbe9d9";
-        c.font = "bold 28px Arial";
-        c.textAlign = "center";
-        c.fillText(
-          i % 3 === 0
-            ? "WEB BALL"
-            : i % 3 === 1
-              ? "OWN THE PITCH"
-              : "THE AURORA LEAGUE",
-          256,
-          43,
-        );
-        const tex = new T.CanvasTexture(canvas);
-        tex.colorSpace = T.SRGBColorSpace;
-        this.textures.push(tex);
-        const ad = this.mesh(
-          new T.PlaneGeometry(12.5, 1.6),
-          new T.MeshBasicMaterial({ map: tex, side: T.DoubleSide }),
-          -57 + i * 12.7,
-          1,
-          side * 39,
-        );
-        ad.rotation.y = side === -1 ? 0 : Math.PI;
-        this.root.add(ad);
-      }
-    for (const x of [-59, 59])
-      for (const z of [-42, 42]) {
-        this.root.add(
-          this.mesh(
-            new T.CylinderGeometry(0.18, 0.3, 25, 8),
-            this.material("#657b77"),
-            x,
-            12.5,
-            z,
-          ),
-        );
-        const light = this.mesh(
-          new T.BoxGeometry(5, 1.5, 0.4),
-          new T.MeshBasicMaterial({ color: 0xf6f8ec }),
-          x,
-          25,
-          z,
-        );
-        light.rotation.x = 0.3;
-        this.root.add(light);
-      }
+  async loadStadium() {
+    try {
+      const draco = new DRACOLoader().setDecoderPath("/assets/draco/");
+      const loader = new GLTFLoader().setDRACOLoader(draco);
+      const model = await loader
+        .loadAsync("/assets/supplied/stadium.glb")
+        .finally(() => draco.dispose());
+      if (this.disposed) return;
+      model.scene.name = "SuppliedStadium";
+      model.scene.traverse((object) => {
+        if (object.name.startsWith("StadiumRoof")) object.visible = false;
+        const mesh = object as T.Mesh;
+        if (!mesh.isMesh) return;
+        mesh.receiveShadow = this.settings.quality === "high";
+      });
+      this.root.add(model.scene);
+    } catch (error) {
+      if (this.disposed) return;
+      const message = document.createElement("div");
+      message.className = "renderer-error";
+      message.textContent = `Stadium could not load: ${(error as Error).message}`;
+      this.container.appendChild(message);
+    }
   }
   async loadPlayers() {
     try {
       const loader = new GLTFLoader();
-      const [footballer, motionLibrary] = await Promise.all([
-        loader.loadAsync("/assets/players/footballer.glb"),
-        loader.loadAsync("/assets/players/football-actions.glb"),
+      const [footballer, motionLibrary, distant] = await Promise.all([
+        loader.loadAsync("/assets/supplied/footballer.glb"),
+        loader.loadAsync("/assets/supplied/football-actions.glb"),
+        loader.loadAsync("/assets/supplied/footballer-match.glb"),
       ]);
       if (this.disposed) return;
+      const distantMeshes: T.BufferGeometry[] = [];
+      distant.scene.traverse((o) => {
+        if ((o as T.Mesh).isMesh) distantMeshes.push((o as T.Mesh).geometry);
+      });
       const clips = new Map(
         motionLibrary.animations.map((clip) => [clip.name, clip]),
       );
@@ -409,27 +391,40 @@ export class Stadium {
         const variation = appearanceVariation(player.data.id);
         group.scale.set(variation.build, variation.height, variation.build);
         group.userData.name = player.data.name;
+        const lod: Avatar["lod"] = [];
         group.traverse((object) => {
           const mesh = object as T.SkinnedMesh;
           if (!mesh.isMesh) return;
+          const far = distantMeshes[lod.length];
+          if (!far) throw new Error("Distance mesh does not match player skin");
+          lod.push({ mesh, near: mesh.geometry, far });
           mesh.castShadow = this.settings.quality === "high";
           mesh.frustumCulled = false;
           const originals = Array.isArray(mesh.material)
             ? mesh.material
             : [mesh.material];
           const customized = originals.map((source) => {
+            if (source.name.startsWith("WB_SuppliedKit")) {
+              if (!mesh.geometry.getAttribute("color_1"))
+                throw new Error("Player fabric mask is missing");
+              return suppliedKit(source, color);
+            }
             const next = source.clone() as T.MeshStandardMaterial;
-            if (next.name === "WB_Shirt" || next.name === "WB_Socks")
+            if (
+              next.name.startsWith("WB_Shirt") ||
+              next.name.startsWith("WB_Socks")
+            )
               next.color.set(color);
-            else if (next.name === "WB_Shorts")
+            else if (next.name.startsWith("WB_Shorts"))
               next.color.set(variation.shorts);
-            else if (next.name === "WB_Skin")
+            else if (next.name.startsWith("WB_Skin"))
               next.color.set(skinColors[player.data.skin] ?? skinColors[2]);
-            else if (next.name === "WB_Hair")
+            else if (next.name.startsWith("WB_Hair"))
               next.color.set(
                 [0x17110e, 0x2c1b12, 0x4a2c17, 0x0d0c0a][player.data.hair % 4],
               );
-            else if (next.name === "WB_Boots") next.color.set(variation.boots);
+            else if (next.name.startsWith("WB_Boots"))
+              next.color.set(variation.boots);
             next.roughness = Math.max(0.5, next.roughness);
             return next;
           });
@@ -450,7 +445,7 @@ export class Stadium {
         }
         const idle = actions.get("idle");
         idle?.play();
-        const avatar = { group, mixer, actions, active: "idle" };
+        const avatar = { group, mixer, actions, active: "idle", lod };
         this.avatars.push(avatar);
         this.root.add(group);
       }
@@ -492,15 +487,28 @@ export class Stadium {
     numberMesh.name = "ShirtNumber";
     numberMesh.position.set(0, 1.38, -0.205);
     numberMesh.rotation.y = Math.PI;
+    group.updateMatrixWorld(true);
+    const spine = group.getObjectByName("Spine_011");
+    numberMesh.position.set(0, 1.28, -0.125);
     group.add(numberMesh);
+    group.updateMatrixWorld(true);
+    spine?.attach(numberMesh);
   }
-  setAnimation(avatar: Avatar, name: string) {
+  setAnimation(avatar: Avatar, name: string, actionTime = 0) {
     if (avatar.active === name) return;
     const next = avatar.actions.get(name) ?? avatar.actions.get("idle");
     const previous = avatar.actions.get(avatar.active);
     if (!next) return;
-    previous?.fadeOut(0.18);
-    next.reset().fadeIn(0.18).play();
+    const contact = ["pass", "shoot", "lob"].includes(name);
+    const blend = contact ? 0.06 : 0.18;
+    previous?.fadeOut(blend);
+    next.reset().setEffectiveTimeScale(1).fadeIn(blend).play();
+    if (contact && actionTime > 0) {
+      // The engine emits these actions when the ball leaves the foot. Start
+      // at impact and play the follow-through within its action window.
+      next.time = next.getClip().duration * 0.55;
+      next.timeScale = (next.getClip().duration - next.time) / actionTime;
+    }
     avatar.active = name;
   }
   ballTexture() {
@@ -545,8 +553,16 @@ export class Stadium {
         a = this.avatars[i];
       if (!a) continue;
       a.group.visible = !p.red && !p.injured;
+      this.shadowTransform.position.set(p.x, 0.025, p.z);
+      this.shadowTransform.scale.setScalar(a.group.visible ? 1 : 0);
+      this.shadowTransform.updateMatrix();
+      this.contactShadows.setMatrixAt(i, this.shadowTransform.matrix);
       if (!a.group.visible) continue;
       a.group.position.set(p.x, 0, p.z);
+      const distant =
+        this.camera.position.distanceToSquared(a.group.position) > 24 * 24;
+      for (const part of a.lod)
+        part.mesh.geometry = distant ? part.far : part.near;
       let angle = p.facing - a.group.rotation.y;
       angle = Math.atan2(Math.sin(angle), Math.cos(angle));
       a.group.rotation.y += angle * Math.min(1, dt * 14);
@@ -558,20 +574,23 @@ export class Stadium {
             ? "gk_stance"
             : speed > 7.2
               ? "sprint"
-              : speed > 1.1
+              : speed > 2.5
                 ? "jog"
-                : "idle";
-      this.setAnimation(a, animation);
+                : speed > 0.2
+                  ? "walk"
+                  : "idle";
+      this.setAnimation(a, animation, p.action);
       const active = a.actions.get(animation);
-      if (active)
+      if (active && ["walk", "jog", "sprint"].includes(animation))
         active.timeScale =
-          animation === "jog"
-            ? clamp(speed / 5.2, 0.72, 1.35)
-            : animation === "sprint"
-              ? clamp(speed / 8.2, 0.8, 1.35)
-              : 1;
+          animation === "walk"
+            ? clamp(speed / 1.6, 0.35, 1.6)
+            : animation === "jog"
+              ? clamp(speed / 5.2, 0.72, 1.35)
+              : clamp(speed / 8.2, 0.8, 1.35);
       a.mixer.update(dt);
     }
+    this.contactShadows.instanceMatrix.needsUpdate = true;
     const b = match.ball;
     this.ball.position.set(b.x, b.y, b.z);
     this.ball.rotation.z -= b.vx * dt * 2;
@@ -664,7 +683,13 @@ export class Stadium {
   dispose() {
     this.disposed = true;
     this.resize.disconnect();
-    this.avatars.forEach((avatar) => avatar.mixer.stopAllAction());
+    this.avatars.forEach((avatar) => {
+      avatar.mixer.stopAllAction();
+      avatar.lod.forEach(({ near, far }) => {
+        near.dispose();
+        far.dispose();
+      });
+    });
     this.scene.traverse((o) => {
       const m = o as T.Mesh;
       if (m.geometry) m.geometry.dispose();
@@ -673,7 +698,17 @@ export class Stadium {
           mat.dispose();
       }
     });
-    this.textures.forEach((t) => t.dispose());
+    const textures = new Set<T.Texture>(this.textures);
+    this.scene.traverse((object) => {
+      const mesh = object as T.Mesh;
+      if (!mesh.isMesh) return;
+      for (const material of Array.isArray(mesh.material)
+        ? mesh.material
+        : [mesh.material])
+        for (const value of Object.values(material))
+          if (value instanceof T.Texture) textures.add(value);
+    });
+    textures.forEach((texture) => texture.dispose());
     this.characterError?.remove();
     this.renderer.dispose();
     this.renderer.domElement.remove();

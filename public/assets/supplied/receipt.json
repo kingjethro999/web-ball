@@ -1,7 +1,7 @@
 {
   "source_sha256": "6f6c1b5f9cd6bb600500b03a6c100aed777d72521574c4e115d3fe736df9ab02",
   "triangles": 37286,
-  "match_triangles": 11185,
+  "match_triangles": 11184,
   "bones": 25,
   "animations": [
     "idle",
@@ -23,5 +23,45 @@
     "celebrate",
     "dejected",
     "referee_signal"
-  ]
+  ],
+  "foot_contact": {
+    "idle": {
+      "minimum_sole_height": 0.0029998262169251976,
+      "maximum_sole_height": 0.0030001622493039367,
+      "contact_samples": 151,
+      "samples": 151
+    },
+    "walk": {
+      "minimum_sole_height": 0.002999825284549636,
+      "maximum_sole_height": 0.003000193615879421,
+      "contact_samples": 81,
+      "samples": 81
+    },
+    "jog": {
+      "minimum_sole_height": 0.0029998031864081785,
+      "maximum_sole_height": 0.22713149232435448,
+      "contact_samples": 20,
+      "samples": 57
+    },
+    "sprint": {
+      "minimum_sole_height": 0.002999897387295738,
+      "maximum_sole_height": 0.20090361885802155,
+      "contact_samples": 16,
+      "samples": 41
+    },
+    "slide": {
+      "corrected_frames": 73,
+      "frames": 73
+    },
+    "gk_dive_left": {
+      "corrected_frames": 47,
+      "frames": 73
+    },
+    "gk_dive_right": {
+      "corrected_frames": 46,
+      "frames": 73
+    }
+  },
+  "boundary_edges_before_weld": 27696,
+  "boundary_edges_after_weld": 15
 }
