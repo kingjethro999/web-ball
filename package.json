@@ -5,10 +5,10 @@
   "type": "module",
   "description": "An original browser football game with a 3D match engine and persistent careers.",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "node api.js && vite --host 0.0.0.0",
     "dev:server": "node --import tsx --watch server/index.ts",
-    "build": "tsc --noEmit && vite build",
-    "start": "node --import tsx server/index.ts",
+    "build": "node api.js && tsc --noEmit && vite build",
+    "start": "node api.js && node --import tsx server/index.ts",
     "test": "node --import tsx --test test/*.test.ts",
     "db:migrate": "node --import tsx server/migrate.ts",
     "assets:check": "node tools/validate-supplied-assets.mjs"

@@ -1,6 +1,6 @@
 # Web Ball
 
-**Continuation checkpoint, not the requested finished overhaul.** Start with [LOCAL_CODEX_START.md](LOCAL_CODEX_START.md), [AUDIT.md](AUDIT.md), [SPEC.md](SPEC.md), and [ASSET_SETUP.md](ASSET_SETUP.md). M1 is incomplete: licensed rigged source assets are included but are NOT integrated. The existing primitive player renderer is rejected legacy code.
+**Continuation checkpoint, not the requested finished overhaul.** Start with [LOCAL_CODEX_START.md](LOCAL_CODEX_START.md), [AUDIT.md](AUDIT.md), [SPEC.md](SPEC.md), and [ASSET_SETUP.md](ASSET_SETUP.md). M1 is incomplete. The active renderer uses the supplied skinned footballer and stadium; see [the current visual review](docs/M1_REVIEW.md) for screenshots, checks and remaining defects.
 
 Mobile is now landscape-only: portrait shows a rotate screen and pauses active play. The automatic software fallback has been removed.
 
@@ -112,7 +112,7 @@ npm run build
 
 18 automated tests cover six-minute timing, schedules, formation assignment, transactions, upgrade caps, progression, suspensions, season rollover, save validation, scoring, restarts, offside, substitutions and an AI simulation. Account integration is tested against PGlite (the PostgreSQL engine compiled to WASM), including registration, password hashes, sessions, authentication, ownership isolation, revision conflicts and logout.
 
-Historical checks of the rejected build (NOT new M1 acceptance): browser checks covered home and settings, entering a match, the six-minute selection, pause/resume and a substitution. The home, squad and transfer-market layouts were also checked in a 390px iframe with no horizontal overflow. The testing browser disables WebGL; browser gameplay checks therefore used the software fallback. The 3D renderer compiles but has **not been visually or performance-validated on a GPU in this environment**. Test High and Low modes on your PC. Actual Neon connectivity and physical controller/mobile hardware remain untested.
+Historical checks of the rejected build covered home/settings, match entry, the six-minute selection, pause/resume and substitution using the former software fallback. The October 1 review inspected the supplied characters and all six cameras in hardware WebGL on the actual PC, plus a short movement/pass scenario. See [the visual review](docs/M1_REVIEW.md). Sustained performance, a full interactive match, actual Neon connectivity and physical controller/mobile hardware remain untested.
 
 ## Deliberate alpha limitations
 
